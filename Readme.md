@@ -8,11 +8,11 @@ https://hci.iwr.uni-heidelberg.de/node/6132
 
 In order to download dataset we have to register and a code will be sent to our e-mail address:
 
-<img src="/media/berk/DATA2/Topics/Training_Traffic_Lights_With_YoloV3/imgs/download_bosch_traffic_dataset.png" alt="Download Bosch Small Traffic Lights Dataset">
+<img src="imgs/download_bosch_traffic_dataset.png" alt="Download Bosch Small Traffic Lights Dataset">
 
 Dataset is around 6 GB, so it will take a while to download it. When download is done you should be using 7-zip to open it (In Ubuntu Archieve Manager is not opening the zipped file!).
 
-<img src="/media/berk/DATA2/Topics/Training_Traffic_Lights_With_YoloV3/imgs/dataset_tree.png" alt="Bosch Small Traffic Lights Dataset Tree">
+<img src="imgs/dataset_tree.png" alt="Bosch Small Traffic Lights Dataset Tree">
 
 After extracting we see that we have 7 different folders and 5093 images which is a good number for training traffic lights.
 
