@@ -379,8 +379,7 @@ A new window will pop and show if any traffic lights are classified.
 3. <a href="https://github.com/bosch-ros-pkg/bstld"> Bosch Small Traffic Lights Dataset Github Repository</a>
 4. <a href="https://www.learnopencv.com/training-yolov3-deep-learning-based-custom-object-detector/">  LearnOpenCV, Training YOLOv3 : Deep Learning based Custom Object Detector</a>
 5. <a href="http://emaraic.com/blog/yolov3-custom-object-detector">EMARAIC, How to build a custom object detector using YOLOv3 in Python</a>
-6. <a href="https://www.learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/">
- Deep Learning based Object Detection using YOLOv3 with OpenCV ( Python / C++ ) </a>
+6. <a href="https://www.learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/"> Deep Learning based Object Detection using YOLOv3 with OpenCV ( Python / C++ ) </a>
 7. <a href="https://github.com/leggedrobotics/darknet_ros">YOLO ROS: Real-Time Object Detection for ROS Github Repository</a>
 8. <a href="https://github.com/pjreddie/darknet/issues/568>YOLOv3"> Anchor Calculation Explained </a>
 9. <a href="https://github.com/carla-simulator/ros-bridge"> Carla ROS bridge</a>
