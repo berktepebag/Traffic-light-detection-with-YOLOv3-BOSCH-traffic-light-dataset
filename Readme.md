@@ -331,3 +331,56 @@ After training done (after 30000 images results are getting sufficient) try it w
 ```html
 ./darknet detector demo traffic-lights/voc-bosch.data traffic-lights/yolov3-tiny-bosch.cfg traffic-lights/backup/yolov3-tiny-bosch_40000.weights <video file>
 ```
+
+## Video Demo
+
+Let's try our classifier with a video:
+
+```html
+./darknet detector demo traffic-lights/voc-bosch.data traffic-lights/yolov3-tiny-bosch.cfg traffic-lights//backup/yolov3-tiny-bosch_40000.weights <video file>
+```
+
+<img src="imgs/traffic_light_detector_demo.png" alt="YOLOv3 Traffic light detector demo">
+
+## YOLO ROS
+
+Videos are good for showing the results but we need something more interactive which makes <a href="http://carla.org/">Carla simulator</a> a great choice. Carla has built in ROS connections so it makes it even better for our case. Follow the instructions on the website to start using Carla. We can write our own nodes for traffic light detection but still we would like to use YOLO for classifcation. Since we have weights, cfg and data files, we can use them with this <a href="https://github.com/leggedrobotics/darknet_ros">leggedrobotics/darknet_ros repository</a> that combines YOLO and ROS and makes our lives easier.
+
+
+Once we clone the darknet_ros repository follow the instructions and run Carla server with:
+```html
+cd ~/UnrealEngine_4.22/carla/Dist/CARLA_Shipping_0.9.6-27-g8e2a15f3/LinuxNoEditor'
+
+carla_srv_run='./CarlaUE4.sh -carla-server -windowed -ResX=320 -ResY=240 -benchmark -fps=10'
+```
+Clone, make and launch carla_ros_bridge:
+```html
+roslaunch carla_ros_bridge carla_ros_bridge.launch
+```
+Go to the carla/PythonAPI/examples folder and run:
+
+```html
+python manual_control.py --rolename=ego_vehicle
+```
+
+Finally launch darknet_ros:
+
+```html
+roslaunch darknet_ros darknet_ros.launch image:=/carla/ego_vehicle/camera/rgb/front/image_color
+```
+<img src="imgs/yolov3_ROS_carla.png" alt="YOLOv3 Traffic light detector ROS Carla">
+
+A new window will pop and show if any traffic lights are classified.
+
+### References:
+
+1. <a href="https://pjreddie.com/darknet/yolo/"> YOLOv3 Website </a>
+2. <a href="https://hci.iwr.uni-heidelberg.de/node/6132"> BOSCH Traffic Lights Dataset</a>
+3. <a href="https://github.com/bosch-ros-pkg/bstld"> Bosch Small Traffic Lights Dataset Github Repository</a>
+4. <a href="https://www.learnopencv.com/training-yolov3-deep-learning-based-custom-object-detector/">  LearnOpenCV, Training YOLOv3 : Deep Learning based Custom Object Detector</a>
+5. <a href="http://emaraic.com/blog/yolov3-custom-object-detector">EMARAIC, How to build a custom object detector using YOLOv3 in Python</a>
+6. <a href="https://www.learnopencv.com/deep-learning-based-object-detection-using-yolov3-with-opencv-python-c/">
+ Deep Learning based Object Detection using YOLOv3 with OpenCV ( Python / C++ ) </a>
+7. <a href="https://github.com/leggedrobotics/darknet_ros">YOLO ROS: Real-Time Object Detection for ROS Github Repository</a>
+8. <a href="https://github.com/pjreddie/darknet/issues/568>YOLOv3"> Anchor Calculation Explained </a>
+9. <a href="https://github.com/carla-simulator/ros-bridge"> Carla ROS bridge</a>
