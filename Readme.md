@@ -383,3 +383,4 @@ A new window will pop and show if any traffic lights are classified.
 7. <a href="https://github.com/leggedrobotics/darknet_ros">YOLO ROS: Real-Time Object Detection for ROS Github Repository</a>
 8. <a href="https://github.com/pjreddie/darknet/issues/568>YOLOv3"> Anchor Calculation Explained </a>
 9. <a href="https://github.com/carla-simulator/ros-bridge"> Carla ROS bridge</a>
+10. <a href="https://silvamfpedro.github.io/thesis-blog/index.html"> Study and Adaptation of the Autonomous Driving Simulator CARLA for ATLASCAR2</a>
