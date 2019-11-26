@@ -2,6 +2,8 @@
 
 YOLOv3 is a real-time object detection system, and it runs really fast on the CUDA supported GPUs (NVIDIA). So our aim is to train the model using the Bosch Small Traffic Lights Dataset and run it on images, videos and Carla simulator. Finally we will try it on NVIDIA Jetson Nano, which is a very small and capable SoC.
 
+<img src="imgs/intro.png" alt="results">
+
 First start with downloading Bosch Small Traffic Lights Dataset:
 
 https://hci.iwr.uni-heidelberg.de/node/6132
