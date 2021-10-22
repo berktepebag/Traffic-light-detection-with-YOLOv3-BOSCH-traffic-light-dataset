@@ -1,5 +1,7 @@
 # Detecting Traffic Lights in Real-time with YOLOv3
 
+### **UPDATE:** I revisited the Repo to make it easier to follow and there was an update in PyYaml which caused some error. Please revert to previous commit if you were following this tutorial before 22 October 2021. If you are a new comer, please test the code and if you see any problems let me know. Best.
+
 YOLOv3 is a real-time object detection system, and it runs really fast on the CUDA supported GPUs (NVIDIA). So our aim is to train the model using the Bosch Small Traffic Lights Dataset and run it on images, videos and Carla simulator. Finally we will try it on NVIDIA Jetson Nano, which is a very small and capable SoC.
 
 <img src="imgs/intro.png" alt="results">
@@ -55,12 +57,23 @@ git clone git@github.com:bosch-ros-pkg/bstld.git
 
 If you already don't have SSH key and getting an error, you have to set one and link it to your Github account in order to clone this repository. You can follow <a href="https://help.github.com/en/articles/connecting-to-github-with-ssh"> Github tutorial for SSH</a>.
 
+### Data Folders Preparation
+**Warning:** Extracted folder has white spaces in it's name. Please avoid white spaces and replace them with '-' (i.e Bosch-Traffic-Light-Dataset). Otherwise paths will be unusable in some cases! 
+
+To keep dataset in order we will create 3 folders under rgb/train/
+1. traffic_light_images
+2. traffic_light_xmls
+3. traffic_light_labels
+
+```html
+cd rgb/train
+```
+
 Since images are in separate folders and it will be easier to manipulate them when they are in one folder let's put them all together under rgb/train/traffic_light_images folder.
 
 ```html
 mkdir traffic_light_images
-find PATH_TO_DATASET/rgb/train/ -type f -print0 | xargs -0 --no-run-if-empty cp --target-directory=PATH_TO_DATASET/rgb/train/traffic_light_images/
-
+find . -type f -print0 | xargs -0 --no-run-if-empty cp --target-directory=traffic_light_images
 ```
 If you do not want to waste your space you should change 'cp' with 'mv' to move the images instead of making a copy of them. Now we have all the images under traffic_light_images folder.
 
@@ -70,29 +83,36 @@ Now create xmls folder and run:
 ```html
 mkdir traffic_light_xmls
 ```
+**Update:** PyYaml's load function has been <a href=https://stackoverflow.com/questions/69564817/typeerror-load-missing-1-required-positional-argument-loader-in-google-col>deprecated</a>, so if you are getting an error with yaml.load() you should change bosch_to_pascal.py line 60 to yaml.safe_load() .
 
-Now go back to top bstld folder and run bosch_to_pascal.py script which will create necessary xml files for training with YOLO. Where first argument is PATH_TO_DATASET/train.yaml and second argument is /train/traffic_light_xmls folder which we recently created. Go back into the bstld folder:
+
+Now go back to top Bosch-Traffic-Light-Dataset folder and run bosch_to_pascal.py script from bstld, which will create necessary xml files for training with YOLO. Where first argument is PATH_TO_DATASET/train.yaml and second argument is rgb/train/traffic_light_xmls folder which we recently created:
 ```html
- python bosch_to_pascal.py ../train.yaml ../rgb/train/traffic_light_xmls/
+cd ../..
+python bstld/bosch_to_pascal.py train.yaml rgb/train/traffic_light_xmls/
 ```
 
 Now we have 5093 xml label files but we have to convert VOC to YOLO type labels with the script from darknet. So create a traffic_light_labels folder to /rgb/train/
 
 ```html
-mkdir traffic_light_labels
+mkdir rgb/train/traffic_light_labels
 ```
 
+### darknet/traffic-lights folder
 Let's go back to the darknet folder and create a folder named traffic-lights. We will put our files in this folder to reach them easily.
 
 ```html
 mkdir traffic-lights 
-cd traffic-lights
 ```
-Go to darknet/scripts folder and make a copy of the voc_label.py and name it bosch_voc_to_yolo_converter.py under traffic-lights folder. This script will convert VOC type labels to YOLO type labels.
+
+#### VOC -> YOLO
+From darknet/scripts folder, make a copy of the voc_label.py and name it bosch_voc_to_yolo_converter.py and put it under traffic-lights folder. This script will convert VOC type labels to YOLO type labels.
 
 ```html
-cp voc_label.py ../traffic-lights/bosch_voc_to_yolo_converter.py
+cp scripts/voc_label.py traffic-lights/bosch_voc_to_yolo_converter.py
 ```
+
+Here we have to change classes names with our class names from the dataset.
 
 ```Python
 import xml.etree.ElementTree as ET
@@ -157,53 +177,22 @@ for image_set in sets:
         image_name = xml_name.split('.')[0]
         #print("image name: ",image_name)
         #print(images_folder+'/%s.png\n'%(image_name))
-        list_file.write(images_folder+'/%s.png\n'%(image_name))
+        list_file.write(images_folder+'%s.png\n'%(image_name))
         convert_annotation(xml_path,output_folder,image_name)
     list_file.close()
  ```
 
-Here we have to change classes names with our class names. And as arguments we have to give output_folder for .txt files, xmls_list which is a .txt file that has the paths to the xml files and images folder path which we are going to use for training.
-
-We will use the folder PATH_TO_DATASET/rgb/train/traffic_light_labels for outputs, PATH_TO_DATASET/rgb/train/traffic_light_images for training images and we also need a .txt file which keeps the 
-
-
-
-Now go to the cfg folder. Make a copy of the voc.data and name it voc-bosch.data .
-
-```html
-cp voc.data ../traffic-lights/voc-bosch.data
-```
-
-Open it:
-
-```html
-classes= 20
-train  = /home/pjreddie/data/voc/train.txt
-valid  = /home/pjreddie/data/voc/2007_test.txt
-names = data/voc.names
-backup = backup
-```
-
-classes shows the number of the labels we would like to classify. From the dataset we can see that main lights are RedLeft, Red, RedRight, GreenLeft, Green, GreenRight, Yellow and off. Feel free to add or extract the ones you like. So our classes will be '8'. train.txt and test.txt are the text files which has the paths of the image files. names, are labels' names and as mentioned before we should get them from the database.
-
-Let's copy the data/voc.names to traffic-lights and name it voc-bosch.names:
-
-```html
-cp voc.names ../traffic-lights/voc-bosch.names
-```
-
-and replace the items with:
-
-1. RedLeft
-2. Red
-3. RedRight
-4. GreenLeft
-5. Green
-6. GreenRight
-7. Yellow
-8. off
+And for the arguments, we have to give:
+1. output_folder for .txt files (PATH_TO_DATASET/rgb/train/traffic_light_labels)
+2. xmls_list which is a .txt file that has the paths to the xml files and (we will create next)
+3. images folder path which we are going to use for training. (PATH_TO_DATASET/rgb/train/traffic_light_images)
 
 We need the paths of the .xml files as a list in a .txt file, in order to get it we will write a little Python script:
+
+```html
+cd traffic-lights
+subl make_xml_list.py
+```
 
 ```Python
 import os
@@ -238,14 +227,47 @@ labels.close()
 	#print(f)
 ```
 
-Name it "make_xml_list.py" and run it:
+Save and run it:
 
 ```html
 python make_xml_list.py PATH_TO_DATASET/rgb/train/traffic_light_xmls/
 ```
-It will create traffic_lights/bosch_traffic_light_xmls_list.txt file.
+It will create bosch_traffic_light_xmls_list.txt file.
+
+Let's copy the data/voc.names to traffic-lights and name it voc-bosch.names:
+
+```html
+cp ../data/voc.names voc-bosch.names
+subl voc-bosch.names
+```
+
+and replace the items with:
+
+1. RedLeft
+2. Red
+3. RedRight
+4. GreenLeft
+5. Green
+6. GreenRight
+7. Yellow
+8. off
+
+
+Now we can convert VOC to YOLO format:
+
+We will use the folder PATH_TO_DATASET/rgb/train/traffic_light_labels for outputs, 
+recently created bosch_traffic_light_xmls_list.txt and 
+PATH_TO_DATASET/rgb/train/traffic_light_images for training images.
+
+```html
+python bosch_voc_to_yolo_converter.py ~/Datasets/Bosch-Traffic-Light-Dataset/rgb/train/traffic_light_labels/ bosch_traffic_light_xmls_list.txt ~/Datasets/Bosch-Traffic-Light-Dataset/rgb/train/traffic_light_images/
+```
 
 We have to create train.txt and test.txt which are list of the paths' of the relative images. Write a basic splitter script named train_test_split.py:
+
+```html
+subl train_test_split.py
+```
 
 ```Python
 import glob, os
@@ -285,7 +307,22 @@ Create a backup folder inside traffic-lights folder where we will save our weigh
 mkdir backup
 ```
 
-Start updating the voc-bosch.data:
+Make a copy of the cfg/voc.data and name it voc-bosch.data .
+
+```html
+cp ../cfg/voc.data voc-bosch.data
+```
+Open it:
+
+```html
+classes= 20
+train  = /home/pjreddie/data/voc/train.txt
+valid  = /home/pjreddie/data/voc/2007_test.txt
+names = data/voc.names
+backup = backup
+```
+
+classes shows the number of the labels we would like to classify. From the dataset we can see that main lights are RedLeft, Red, RedRight, GreenLeft, Green, GreenRight, Yellow and off. Feel free to add or extract the ones you like. So our classes will be '8'. train.txt and test.txt are the text files which has the paths of the image files. names, are labels' names and as mentioned before we should get them from the database. Let's start updating the voc-bosch.data:
 
 ```html
 classes= 8
@@ -295,10 +332,10 @@ names = traffic-lights/voc-bosch.names
 backup = traffic-lights/backup
 ```
 
-Now we need one more thing to do to start training. Go back to the darknet folder and get into the cfg folder. Make a copy of the yolov3-tiny.cfg into traffic-lights folder and name it yolov3-tiny-bosch.cfg .
+Now we need one more thing to do to start training. Copy yolov3-tiny.cfg from darknet/cfg folder into traffic-lights folder and name it yolov3-tiny-bosch.cfg .
 
 ```html
-cp yolov3-tiny.cfg ../traffic-lights/yolov3-tiny-bosch.cfg
+cp ../cfg/yolov3-tiny.cfg yolov3-tiny-bosch.cfg
 ```
 
 Open it:
