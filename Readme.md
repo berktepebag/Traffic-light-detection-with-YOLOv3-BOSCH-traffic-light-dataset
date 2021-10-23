@@ -1,6 +1,6 @@
 # Detecting Traffic Lights in Real-time with YOLOv3
 
-### **UPDATE:** I revisited the Repo to make it easier to follow and there was an update in PyYaml which caused some error. Please revert to previous commit if you were following this tutorial before 22 October 2021. If you are a new comer, please test the code and if you see any problems let me know. Best.
+### **UPDATE:** I revisited the Repo to make it easier to follow and there was an update in PyYaml which caused some error. Please revert to <a href="https://github.com/berktepebag/Traffic-light-detection-with-YOLOv3-BOSCH-traffic-light-dataset/tree/e55e09257433872089b9d148499eb976e2aca2b4">this commit<a/> if you were following this tutorial before 22 October 2021. If you are a new comer, please test the code and if you see any problems let me know. Best.
 
 YOLOv3 is a real-time object detection system, and it runs really fast on the CUDA supported GPUs (NVIDIA). So our aim is to train the model using the Bosch Small Traffic Lights Dataset and run it on images, videos and Carla simulator. Finally we will try it on NVIDIA Jetson Nano, which is a very small and capable SoC.
 
@@ -363,7 +363,8 @@ We will use the technique called transfer learning where we use the pre-trained 
 Download <a href="https://pjreddie.com/media/files/darknet53.conv.74"> weights of the darknet53 model</a> and train:
 
 ```html
-./darknet detector train traffic-lights/voc-bosch.data traffic-lights/yolov3-tiny-bosch.cfg ../darknet53.conv.74
+cd ..
+./darknet detector train traffic-lights/voc-bosch.data traffic-lights/yolov3-tiny-bosch.cfg darknet53.conv.74
 ```
 
 After training done (after 30000 images results are getting sufficient) try it with:
@@ -380,6 +381,24 @@ Let's try our classifier with a video:
 ```
 
 <img src="imgs/traffic_light_detector_demo.png" alt="YOLOv3 Traffic light detector demo">
+	
+### Probable Problems with OpenCv
+	
+If you are having problem while running make with OpenCv=1:
+	
+1. <a href="https://stackoverflow.com/questions/55306007/how-to-compile-yolov3-with-opencv">Modify Makefile</a>
+Change opencv -> opencv4
+- LDFLAGS+= `pkg-config --libs opencv4` -lstdc++
+- COMMON+= `pkg-config --cflags opencv4` 
+2. <a href="https://stackoverflow.com/questions/64885148/error-iplimage-does-not-name-a-type-when-trying-to-build-darknet-with-opencv"> Modify /src/image_opencv.cpp</a>
+	
+Add:
+- #include "opencv2/core/core_c.h"
+- #include "opencv2/videoio/legacy/constants_c.h"
+- #include "opencv2/highgui/highgui_c.h"
+	
+Change:
+- IplImage ipl = m -> IplImage ipl = cvIplImage(m);
 
 ## YOLO ROS
 
